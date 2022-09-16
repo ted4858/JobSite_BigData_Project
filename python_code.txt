@@ -1,0 +1,59 @@
+# import 패키지, 모듈
+>>> import pandas as pd
+>>> import glob
+>>> import re
+>>> from functools import reduce
+>>> from nltk.tokenize import word_tokenize
+>>> from nltk.corpus import stopwords
+>>> from nltk.stem import WordNetLemmatizer
+>>> from collections import Counter
+>>> import matplotlib.pyplot as plt
+>>> from wordcloud import STOPWORDS, WordCloud
+
+# 취업 사이트에서 파싱한 데이터 파일을 전처리(tokenize)
+>>> all_files = glob.glob('D:/Code/Python/job_posting.xls')
+>>> all_files
+>>> all_files_data = []
+>>> for file in all_files:
+	data_frame = pd.read_excel(file)
+	all_files_data.append(data_frame)
+>>> all_files_data[0]
+>>> all_files_data_concat = pd.concat(all_files_data, axis = 0, ignore_index = True)
+>>> all_files_data_concat
+>>> all_files_data_concat.to_csv('D:/Code/Python/job_posting.csv', encoding = 'utf-8', index = False)
+>>> all_title = all_files_data_concat['직업별직무']
+>>> all_title
+>>> words = []
+>>> for title in all_title:
+	EnWords = str(title)
+	EnWordsToken = word_tokenize(EnWords)
+	words.append(EnWordsToken)
+>>> print(words)
+>>> words2 = list(reduce(lambda x, y: x+y, words))
+>>> print(words2)
+>>> count = Counter(words2)
+>>> count
+>>> word_count = dict()
+>>> for tag, counts in count.most_common(50):
+	if(len(str(tag))>1):
+		word_count[tag] = counts
+		print("%s : %d" % (tag, counts))
+
+# 전처리된 데이터를 막대 그래프로 출력
+>>> sorted_Keys = sorted(word_count, key = word_count.get, reverse = True)
+>>> sorted_Values = sorted(word_count.values(), reverse = True)
+>>> plt.bar(range(len(word_count)), sorted_Values, align = 'center')
+>>> plt.xticks(range(len(word_count)), list(sorted_Keys), rotation = '85')
+>>> plt.title('100대 대전 IT 개발 직무 순위', fontsize=20)
+>>> plt.ylabel('채용 정보 직무 개수', fontsize=18)
+>>> plt.xlabel('채용 정보 직무 이름', fontsize=18)
+>>> plt.show()
+
+# 전처리된 데이터를 워드 클라우드로 출력
+>>> wc = WordCloud(font_path='C:\Windows\Fonts\malgunbd.ttf', background_color = 'ivory', width = 800, height = 600)
+>>> cloud = wc.generate_from_frequencies(word_count)
+>>> plt.figure(figsize = (8,8))
+>>> plt.imshow(cloud)
+>>> plt.axis('off')
+>>> plt.show()
+>>> cloud.to_file("D:/Code/Python/job_posting_bigdata_wordCloud.jpg")
